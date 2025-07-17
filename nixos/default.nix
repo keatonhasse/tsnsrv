@@ -470,11 +470,19 @@ in {
                     DynamicUser = true;
                     Restart = "always";
                     SupplementaryGroups = [config.users.groups.tsnsrv.name] ++ service.supplementalGroups;
-                    StateDirectory = "tsnsrv/${name}";
+                    StateDirectory = "tsnsrv-${name} tsnsrv/${name}";
                     StateDirectoryMode = "0700";
                     LoadCredential = [
                       "authKey:${service.authKeyPath}"
                     ];
+                    ExecStartPre = pkgs.writeShellScript "migrate-state-dir" ''
+                        OLD_STATE_DIR=/var/lib/tsnsrv-${name}
+                        NEW_STATE_DIR=/var/lib/tsnsrv/${name}
+                        if [ -d OLD_STATE_DIR ]; then
+                          mv "$OLD_STATE_DIR"/* "$NEW_STATE_DIR"/
+                          rm -rf $OLD_STATE_DIR
+                        fi
+                      ''
                   }
                   // lib.optionalAttrs (service.loginServerUrl != null) {
                     Environment = "TS_URL=${service.loginServerUrl}";
@@ -491,7 +499,7 @@ in {
             inherit name;
             value = let
               serviceName = "${config.virtualisation.oci-containers.backend}-${name}";
-              stateDir = "tsnsrv/${config.virtualisation.oci-containers.backend}/${name}";
+              stateDirs = "tsnsrv/${config.virtualisation.oci-containers.backend}/${name}";
               credentialsDir = "/run/credentials/${serviceName}.service";
             in {
               imageFile = flake.packages.${pkgs.stdenv.targetPlatform.system}.tsnsrvOciImage;
@@ -531,18 +539,26 @@ in {
             # systemd unit settings for the respective podman services:
             lib.mapAttrs' (name: sidecar: let
               serviceName = "${config.virtualisation.oci-containers.backend}-${name}";
-              stateDir = "tsnsrv/${config.virtualisation.oci-containers.backend}/${name}";
+              stateDirs = "${serviceName} tsnsrv/${config.virtualisation.oci-containers.backend}/${name}";
             in {
               name = serviceName;
               value = {
                 path = ["/run/wrappers"];
                 serviceConfig = {
-                  StateDirectory = stateDir;
+                  StateDirectory = stateDirs;
                   StateDirectoryMode = "0700";
                   SupplementaryGroups = [config.users.groups.tsnsrv.name] ++ sidecar.service.supplementalGroups;
                   LoadCredential = [
                     "authKey:${sidecar.service.authKeyPath}"
                   ];
+                  ExecStartPre = pkgs.writeShellScript "migrate-state-dir" ''
+                      OLD_STATE_DIR=/var/lib/tsnsrv-${name}
+                      NEW_STATE_DIR=/var/lib/tsnsrv/${name}
+                      if [ -d OLD_STATE_DIR ]; then
+                        mv "$OLD_STATE_DIR"/* "$NEW_STATE_DIR"/
+                        rm -rf $OLD_STATE_DIR
+                      fi
+                    ''
                 };
               };
             })
