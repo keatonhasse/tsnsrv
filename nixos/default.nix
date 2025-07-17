@@ -482,7 +482,7 @@ in {
                           mv "$OLD_STATE_DIR"/* "$NEW_STATE_DIR"/
                           rm -rf $OLD_STATE_DIR
                         fi
-                      ''
+                      '';
                   }
                   // lib.optionalAttrs (service.loginServerUrl != null) {
                     Environment = "TS_URL=${service.loginServerUrl}";
@@ -558,7 +558,7 @@ in {
                         mv "$OLD_STATE_DIR"/* "$NEW_STATE_DIR"/
                         rm -rf $OLD_STATE_DIR
                       fi
-                    ''
+                    '';
                 };
               };
             })
