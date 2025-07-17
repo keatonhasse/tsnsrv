@@ -475,14 +475,13 @@ in {
                     LoadCredential = [
                       "authKey:${service.authKeyPath}"
                     ];
-                    ExecStartPre = pkgs.writeShellScript "migrate-state-dir" ''
-                        OLD_STATE_DIR=/var/lib/tsnsrv-${name}
-                        NEW_STATE_DIR=/var/lib/tsnsrv/${name}
-                        if [ -d OLD_STATE_DIR ]; then
-                          mv "$OLD_STATE_DIR"/* "$NEW_STATE_DIR"/
-                          rm -rf $OLD_STATE_DIR
-                        fi
-                      '';
+                    # ExecStartPre = pkgs.writeShellScript "migrate-state-dir" ''
+                        # OLD_STATE_DIR=/var/lib/tsnsrv-${name}
+                        # NEW_STATE_DIR=/var/lib/tsnsrv/${name}
+                        # if [ -d OLD_STATE_DIR ]; then
+                          # mv "$OLD_STATE_DIR"/* "$NEW_STATE_DIR"/
+                        # fi
+                      # '';
                   }
                   // lib.optionalAttrs (service.loginServerUrl != null) {
                     Environment = "TS_URL=${service.loginServerUrl}";
