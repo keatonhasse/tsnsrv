@@ -499,7 +499,7 @@ in {
             inherit name;
             value = let
               serviceName = "${config.virtualisation.oci-containers.backend}-${name}";
-              stateDirs = "tsnsrv/${config.virtualisation.oci-containers.backend}/${name}";
+              stateDir = "tsnsrv/${config.virtualisation.oci-containers.backend}/${name}";
               credentialsDir = "/run/credentials/${serviceName}.service";
             in {
               imageFile = flake.packages.${pkgs.stdenv.targetPlatform.system}.tsnsrvOciImage;
