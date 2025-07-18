@@ -476,7 +476,9 @@ in {
                       "authKey:${service.authKeyPath}"
                     ];
                     ExecStartPre = pkgs.writeShellScript "migrate-state-dir" ''
+                      echo "test"
                       if [ -d /var/lib/private/tsnsrv-${name} ]; then
+                        echo "old state"
                         mv /var/lib/private/tsnsrv-${name}/* /var/lib/private/tsnsrv/${name}
                         chown -R nobody:nogroup /var/lib/private/tsnsrv/*
                         rmdir /var/lib/private/tsnsrv-${name}
