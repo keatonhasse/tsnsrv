@@ -476,7 +476,7 @@ in {
                       "authKey:${service.authKeyPath}"
                     ];
                     ExecStartPre = pkgs.writeShellScript "migrate-state-dir" ''
-                      if [ -d /var/lib/tsnsrv-${name} ]; then
+                      if [ -d /var/lib/private/tsnsrv-${name} ]; then
                         mv /var/lib/private/tsnsrv-${name}/* /var/lib/private/tsnsrv/${name}
                         chown -R nobody:nogroup /var/lib/private/tsnsrv/*
                         rmdir /var/lib/private/tsnsrv-${name}
@@ -552,7 +552,7 @@ in {
                     "authKey:${sidecar.service.authKeyPath}"
                   ];
                   ExecStartPre = pkgs.writeShellScript "migrate-state-dir" ''
-                      if [ -d /var/lib/${serviceName} ]; then
+                      if [ -d /var/lib/private/${serviceName} ]; then
                         mv /var/lib/private/${serviceName}/* /var/lib/private/${stateDir}
                         chown -R nobody:nogroup /var/lib/private/tsnsrv/${config.virtualisation.oci-containers.backend}/*
                         rmdir /var/lib/private/${serviceName}
