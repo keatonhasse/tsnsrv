@@ -477,9 +477,10 @@ in {
                     ];
                     ExecStartPre = pkgs.writeShellScript "migrate-state-dir" ''
                       if [ -d /var/lib/tsnsrv-${name} ]; then
-                        mv /var/lib/tsnsrv-${name}/* /var/lib/tsnsrv/${name}
-                        chown -R nobody:nogroup /var/lib/tsnsrv/*
-                        rmdir /var/lib/tsnsrv-${name}
+                        mv /var/lib/private/tsnsrv-${name}/* /var/lib/private/tsnsrv/${name}
+                        chown -R nobody:nogroup /var/lib/private/tsnsrv/*
+                        rmdir /var/lib/private/tsnsrv-${name}
+                        rm /var/lib/tsnsrv-${name}
                       fi
                     '';
                   }
@@ -552,9 +553,10 @@ in {
                   ];
                   ExecStartPre = pkgs.writeShellScript "migrate-state-dir" ''
                       if [ -d /var/lib/${serviceName} ]; then
-                        mv /var/lib/${serviceName}/* /var/lib/${stateDir}
-                        chown -R nobody:nogroup /var/lib/tsnsrv/${config.virtualisation.oci-containers.backend}/*
-                        rmdir /var/lib/${serviceName}
+                        mv /var/lib/private/${serviceName}/* /var/lib/private/${stateDir}
+                        chown -R nobody:nogroup /var/lib/private/tsnsrv/${config.virtualisation.oci-containers.backend}/*
+                        rmdir /var/lib/private/${serviceName}
+                        rm /var/lib/${serviceName}
                       fi
                     '';
                 };
