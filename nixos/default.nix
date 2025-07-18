@@ -470,18 +470,18 @@ in {
                     DynamicUser = true;
                     Restart = "always";
                     SupplementaryGroups = [config.users.groups.tsnsrv.name] ++ service.supplementalGroups;
-                    StateDirectory = "tsnsrv-${name} tsnsrv/${name}";
+                    StateDirectory = "tsnsrv/${name}";
                     StateDirectoryMode = "0700";
                     LoadCredential = [
                       "authKey:${service.authKeyPath}"
                     ];
-                    # ExecStartPre = pkgs.writeShellScript "migrate-state-dir" ''
-                        # OLD_STATE_DIR=/var/lib/tsnsrv-${name}
-                        # NEW_STATE_DIR=/var/lib/tsnsrv/${name}
-                        # if [ -d OLD_STATE_DIR ]; then
-                          # mv "$OLD_STATE_DIR"/* "$NEW_STATE_DIR"/
-                        # fi
-                      # '';
+                    ExecStartPre = pkgs.writeShellScript "migrate-state-dir" ''
+                      if [ -d /var/lib/tsnsrv-${name} ]; then
+                        mv /var/lib/tsnsrv-${name}/* /var/lib/tsnsrv/${name}
+                        chown -R nobody:nogroup /var/lib/tsnsrv/*
+                        rmdir /var/lib/tsnsrv-${name}
+                      fi
+                    '';
                   }
                   // lib.optionalAttrs (service.loginServerUrl != null) {
                     Environment = "TS_URL=${service.loginServerUrl}";
@@ -538,24 +538,23 @@ in {
             # systemd unit settings for the respective podman services:
             lib.mapAttrs' (name: sidecar: let
               serviceName = "${config.virtualisation.oci-containers.backend}-${name}";
-              stateDirs = "${serviceName} tsnsrv/${config.virtualisation.oci-containers.backend}/${name}";
+              stateDir = "tsnsrv/${config.virtualisation.oci-containers.backend}/${name}";
             in {
               name = serviceName;
               value = {
                 path = ["/run/wrappers"];
                 serviceConfig = {
-                  StateDirectory = stateDirs;
+                  StateDirectory = stateDir;
                   StateDirectoryMode = "0700";
                   SupplementaryGroups = [config.users.groups.tsnsrv.name] ++ sidecar.service.supplementalGroups;
                   LoadCredential = [
                     "authKey:${sidecar.service.authKeyPath}"
                   ];
                   ExecStartPre = pkgs.writeShellScript "migrate-state-dir" ''
-                      OLD_STATE_DIR=/var/lib/tsnsrv-${name}
-                      NEW_STATE_DIR=/var/lib/tsnsrv/${name}
-                      if [ -d OLD_STATE_DIR ]; then
-                        mv "$OLD_STATE_DIR"/* "$NEW_STATE_DIR"/
-                        rm -rf $OLD_STATE_DIR
+                      if [ -d /var/lib/${serviceName} ]; then
+                        mv /var/lib/${serviceName}/* /var/lib/${stateDir}
+                        chown -R nobody:nogroup /var/lib/tsnsrv/${config.virtualisation.oci-containers.backend}/*
+                        rmdir /var/lib/${serviceName}
                       fi
                     '';
                 };
