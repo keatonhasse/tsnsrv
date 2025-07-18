@@ -470,7 +470,7 @@ in {
                     DynamicUser = true;
                     Restart = "always";
                     SupplementaryGroups = [config.users.groups.tsnsrv.name] ++ service.supplementalGroups;
-                    StateDirectory = "tsnsrv/${name}";
+                    StateDirectory = "tsnsrv-${name} tsnsrv/${name}";
                     StateDirectoryMode = "0700";
                     LoadCredential = [
                       "authKey:${service.authKeyPath}"
